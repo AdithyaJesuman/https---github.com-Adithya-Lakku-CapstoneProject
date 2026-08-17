@@ -1,0 +1,160 @@
+# ==============================================================================
+# AIOps Platform - Kubernetes Unified Deployment Manifest
+# Provides deployments and services for all core components of the platform.
+# ==============================================================================
+
+---
+# 1. Message Bus: Kafka & Zookeeper
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+spec:
+  ports:
+    - port: 29092
+      name: kafka-port
+  selector:
+    app: kafka
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: obsidiandynamics/kafka
+          ports:
+            - containerPort: 29092
+          env:
+            - name: KAFKA_LISTENERS
+              value: "INTERNAL://:29092"
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "INTERNAL://kafka:29092"
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "INTERNAL:PLAINTEXT"
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "INTERNAL"
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: "zookeeper:2181"
+
+---
+# 2. AIOps Microservices
+# ----------------------
+# API Gateway & UI
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: api-gateway
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: aiops-api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: KAFKA_BROKER
+              value: "kafka:29092"
+
+---
+# Telemetry Collector
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: collector
+  template:
+    metadata:
+      labels:
+        app: collector
+    spec:
+      containers:
+        - name: collector
+          image: aiops-collector:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BROKER
+              value: "kafka:29092"
+
+---
+# Anomaly Detector
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anomaly-detector
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: anomaly-detector
+  template:
+    metadata:
+      labels:
+        app: anomaly-detector
+    spec:
+      containers:
+        - name: anomaly-detector
+          image: aiops-detector:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BROKER
+              value: "kafka:29092"
+
+---
+# Deterministic Multi-Agent Brain
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multi-agent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: multi-agent
+  template:
+    metadata:
+      labels:
+        app: multi-agent
+    spec:
+      containers:
+        - name: multi-agent
+          image: aiops-multi-agent:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BROKER
+              value: "kafka:29092"

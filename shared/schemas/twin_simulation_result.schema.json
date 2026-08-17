@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "twin_simulation_result",
+  "type": "object",
+  "required": ["incident_id", "fix_tested", "simulation_success", "confidence"],
+  "properties": {
+    "incident_id": {"type": "string"},
+    "fix_tested": {"type": "string"},
+    "simulation_success": {"type": "boolean"},
+    "predicted_error_rate_after": {"type": "number"},
+    "predicted_latency_after_ms": {"type": "number"},
+    "side_effects": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+  }
+}

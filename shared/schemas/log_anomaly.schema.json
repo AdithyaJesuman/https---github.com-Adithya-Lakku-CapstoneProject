@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "log_anomaly",
+  "type": "object",
+  "required": ["log_anomaly_id", "service_name", "timestamp", "anomaly_score"],
+  "properties": {
+    "log_anomaly_id": {"type": "string"},
+    "service_name": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "pattern": {"type": "string"},
+    "raw_log_line": {"type": "string"},
+    "anomaly_score": {"type": "number", "minimum": 0, "maximum": 1}
+  }
+}

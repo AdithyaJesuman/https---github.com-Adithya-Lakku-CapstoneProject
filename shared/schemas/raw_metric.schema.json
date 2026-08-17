@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "raw_metric",
+  "type": "object",
+  "required": ["timestamp", "service_name", "instance_id", "metrics"],
+  "properties": {
+    "timestamp": {"type": "string", "format": "date-time"},
+    "service_name": {"type": "string"},
+    "instance_id": {"type": "string"},
+    "region": {"type": "string"},
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "cpu_percent": {"type": "number"},
+        "memory_percent": {"type": "number"},
+        "response_time_ms": {"type": "number"},
+        "error_rate": {"type": "number"},
+        "throughput_rps": {"type": "number"},
+        "db_query_time_ms": {"type": "number"},
+        "queue_depth": {"type": "number"},
+        "active_connections": {"type": "number"}
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "deployment_id": {"type": "string"},
+        "feature_flags_active": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}

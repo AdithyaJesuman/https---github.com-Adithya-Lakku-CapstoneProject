@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "anomaly_event",
+  "type": "object",
+  "required": ["anomaly_id", "timestamp", "service_name", "confidence", "severity"],
+  "properties": {
+    "anomaly_id": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "service_name": {"type": "string"},
+    "detector": {"type": "string"},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "severity": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+    "triggering_metrics": {"type": "array", "items": {"type": "string"}},
+    "raw_values": {"type": "object"},
+    "baseline_values": {"type": "object"}
+  }
+}

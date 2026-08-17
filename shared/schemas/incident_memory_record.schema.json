@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "incident_memory_record",
+  "type": "object",
+  "required": ["incident_id", "timestamp", "symptoms", "root_cause", "fix_applied", "outcome"],
+  "properties": {
+    "incident_id": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "symptoms": {"type": "object"},
+    "root_cause": {"type": "string"},
+    "fix_applied": {"type": "string"},
+    "outcome": {"type": "string", "enum": ["resolved", "auto_heal_failed", "escalated"]},
+    "time_to_resolution_seconds": {"type": "number"},
+    "embedding_text": {"type": "string"}
+  }
+}

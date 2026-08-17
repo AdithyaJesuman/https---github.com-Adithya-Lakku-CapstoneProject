@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "graph_context",
+  "type": "object",
+  "required": ["service_name", "depends_on", "depended_on_by", "blast_radius"],
+  "properties": {
+    "service_name": {"type": "string"},
+    "depends_on": {"type": "array", "items": {"type": "string"}},
+    "depended_on_by": {"type": "array", "items": {"type": "string"}},
+    "blast_radius": {"type": "array", "items": {"type": "string"}},
+    "similar_past_incidents": {"type": "array", "items": {"type": "string"}}
+  }
+}

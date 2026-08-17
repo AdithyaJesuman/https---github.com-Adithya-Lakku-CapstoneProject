@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIOps Command Center</title>
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #09090b;
+            --surface: rgba(255, 255, 255, 0.03);
+            --surface-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-glow: rgba(56, 189, 248, 0.15);
+            --accent-cyan: #38bdf8;
+            --accent-pink: #f472b6;
+            --accent-green: #34d399;
+            --accent-red: #f87171;
+            
+            --font-heading: 'Outfit', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: var(--font-heading);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(circle at 15% 50%, var(--accent-glow), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(244, 114, 182, 0.05), transparent 25%);
+        }
+
+        /* Nav */
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--surface-border);
+            background: rgba(9, 9, 11, 0.7);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 1.5rem;
+            padding: 2rem;
+            flex-grow: 1;
+            height: calc(100vh - 80px);
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        .panel-header {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Controls (Left Panel) */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        button.inject-btn {
+            background: transparent;
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button.inject-btn:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(56, 189, 248, 0.05);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+        }
+
+        button.inject-btn::after {
+            content: '⚡';
+            font-size: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Telemetry Stream (Center Panel) */
+        .telemetry-feed {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+        
+        .telemetry-feed::-webkit-scrollbar {
+            width: 4px;
+        }
+        .telemetry-feed::-webkit-scrollbar-thumb {
+            background: var(--surface-border);
+            border-radius: 4px;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border-left: 2px solid transparent;
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .log-line.normal { border-left-color: var(--accent-green); color: var(--text-muted); }
+        .log-line.warning { border-left-color: var(--accent-pink); background: rgba(244,114,182,0.05); color: var(--text-main); }
+
+        .log-time { color: var(--text-muted); }
+
+        /* Reasoning Feed (Right Panel) */
+        .reasoning-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        .incident-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--accent-pink);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 0 20px rgba(244,114,182,0.1) inset;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .incident-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .incident-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-pink);
+        }
+
+        .confidence-badge {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            background: rgba(244,114,182,0.15);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--accent-pink);
+        }
+
+        .agent-step {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .agent-icon {
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+            font-weight: bold;
+        }
+
+        .agent-text {
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .fix-box {
+            margin-top: 1rem;
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent-cyan);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="status-dot"></div>
+            <h1>AIOps Command Center</h1>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent-cyan);">
+            System Status: Autonomous
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <span style="color: var(--accent-cyan)">⬡</span> Chaos Injection
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.5;">
+                Manually trigger incidents to observe the autonomous agents in real-time.
+            </p>
+            <div class="control-group">
+                <button class="inject-btn" onclick="injectAnomaly('db_connection_pool_exhaustion')">
+                    DB Pool Exhaustion
+                </button>
+                <button class="inject-btn" onclick="injectAnomaly('cpu_saturation')">
+                    CPU Saturation Spike
+                </button>
+                <button class="inject-btn" onclick="injectAnomaly('network_partition')">
+                    Network Partition
+                </button>
+            </div>
+        </div>
+
+        <!-- Telemetry Stream -->
+        <div class="panel">
+            <div class="panel-header">
+                <span style="color: var(--accent-green)">∿</span> Live Telemetry Stream
+            </div>
+            <div class="telemetry-feed" id="telemetryFeed">
+                <!-- Logs will appear here -->
+                <div class="log-line normal">
+                    <span class="log-time">system</span>
+                    <span>Waiting for metric stream...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Reasoning -->
+        <div class="panel">
+            <div class="panel-header">
+                <span style="color: var(--accent-pink)">❖</span> Active Incident Diagnostics
+            </div>
+            <div class="reasoning-feed" id="reasoningFeed">
+                <!-- Agent reasoning appears here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_URL = window.location.origin;
+
+        // 1. Setup Telemetry Stream
+        const telemetrySource = new EventSource(`${API_URL}/stream/metrics`);
+        const telemetryFeed = document.getElementById('telemetryFeed');
+        
+        telemetrySource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const line = document.createElement('div');
+            
+            // Check if anomalous
+            const isAnomalous = data.cpu_percent > 80 || data.error_rate > 10 || data.active_connections > 800;
+            line.className = `log-line ${isAnomalous ? 'warning' : 'normal'}`;
+            
+            const time = new Date(data.timestamp || Date.now()).toLocaleTimeString([], {hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            line.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span>SVC:${data.service_name} | CPU:${data.cpu_percent.toFixed(1)}% | ERR:${data.error_rate.toFixed(1)}% | CON:${data.active_connections} | LAT:${data.response_time_ms.toFixed(0)}ms</span>
+            `;
+            
+            telemetryFeed.prepend(line);
+            if (telemetryFeed.children.length > 50) {
+                telemetryFeed.removeChild(telemetryFeed.lastChild);
+            }
+        };
+
+        // 2. Setup Incident Diagnosis Stream
+        const incidentSource = new EventSource(`${API_URL}/stream/anomalies`);
+        const reasoningFeed = document.getElementById('reasoningFeed');
+
+        incidentSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const card = document.createElement('div');
+            card.className = 'incident-card';
+            
+            let fixesHtml = '';
+            if (data.candidate_fixes && data.candidate_fixes.length > 0) {
+                const fix = data.candidate_fixes[0];
+                fixesHtml = `
+                    <div class="fix-box">
+                        ▶ EXECUTOR_TARGET: ${fix.action}<br>
+                        ▶ PROBABILITY_SUCCESS: ${(fix.estimated_success_rate * 100).toFixed(0)}%
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="incident-header">
+                    <div class="incident-title">${data.root_cause.replace(/_/g, ' ').toUpperCase()}</div>
+                    <div class="confidence-badge">${(data.confidence * 100).toFixed(1)}% CONF</div>
+                </div>
+                <div class="agent-step">
+                    <div class="agent-icon">[MON]</div>
+                    <div class="agent-text">Anomaly threshold breached. Escalated to Diagnosis.</div>
+                </div>
+                <div class="agent-step">
+                    <div class="agent-icon">[DIA]</div>
+                    <div class="agent-text">Matched signature: ${data.rule_matched}</div>
+                </div>
+                <div class="agent-step">
+                    <div class="agent-icon">[FCT]</div>
+                    <div class="agent-text">${data.forecast ? data.forecast.business_impact_description : 'Critical degradation imminent.'}</div>
+                </div>
+                <div class="agent-step">
+                    <div class="agent-icon">[PLN]</div>
+                    <div class="agent-text">Generated deterministic playbook response.</div>
+                </div>
+                ${fixesHtml}
+            `;
+            
+            reasoningFeed.prepend(card);
+        };
+
+        // 3. Inject Button Handler
+        async function injectAnomaly(type) {
+            try {
+                await fetch(`${API_URL}/inject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ incident_type: type })
+                });
+                
+                // Add a local log for immediate feedback
+                const line = document.createElement('div');
+                line.className = 'log-line warning';
+                line.innerHTML = `<span class="log-time">[SYS]</span> <span style="color: var(--accent-pink)">CHAOS INJECTED: ${type}</span>`;
+                telemetryFeed.prepend(line);
+                
+            } catch (err) {
+                console.error("Injection failed", err);
+            }
+        }
+    </script>
+</body>
+</html>
